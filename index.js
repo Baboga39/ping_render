@@ -1,15 +1,21 @@
 const axios = require("axios");
-const cron = require("node-cron");
 
-const URL = "https://trungnamhub-server.onrender.com";
+const URL = "https://trungnamhub-server.onrender.com/health";
 
-cron.schedule("*/5 * * * *", async () => {
+async function ping() {
   try {
     const res = await axios.get(URL);
-    console.log("Ping success:", res.status);
+    console.log("Ping success:", res.status, new Date().toISOString());
   } catch (err) {
-    console.log("Ping error:", err.message);
+    if (err.response) {
+      console.log("Ping failed:", err.response.status);
+    } else {
+      console.log("Ping error:", err.message);
+    }
   }
-});
+}
+
+// 5 phút
+setInterval(ping, 5 * 60 * 1000);
 
 console.log("Ping service started...");
