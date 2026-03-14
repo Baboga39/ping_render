@@ -27,7 +27,7 @@ async function ping() {
 ping();
 
 // ping mỗi 5 phút
-setInterval(ping, 5 * 60 * 1000);
+setInterval(ping, 1 * 60 * 1000);
 
 const PORT = process.env.PORT || 3000;
 
