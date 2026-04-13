@@ -5,32 +5,42 @@ const app = express();
 
 const URL = "https://trungnamhub-server.onrender.com/health";
 
-// endpoint để service khác ping lại
 app.get("/health", (req, res) => {
   res.status(200).send("OK");
 });
 
+let isRunning = false;
+
 async function ping() {
+  if (isRunning) return;
+  isRunning = true;
+
   try {
-    const res = await axios.get(URL);
-    console.log("Ping main server:", res.status, new Date().toISOString());
+    const res = await axios.get(URL, {
+      timeout: 5000,
+    });
+
+    console.log("✅ Ping success:", res.status, new Date().toISOString());
   } catch (err) {
-    if (err.response) {
-      console.log("Ping failed:", err.response.status);
-    } else {
-      console.log("Ping error:", err.message);
-    }
+    console.error("❌ Ping error:", {
+      message: err.message,
+      status: err.response?.status,
+    });
+  } finally {
+    isRunning = false;
   }
 }
 
-// chạy ngay khi start
-ping();
+// chạy sau khi server start (best practice)
+function startPing() {
+  ping(); // chạy ngay
 
-// ping mỗi 5 phút
-setInterval(ping, 1 * 60 * 1000);
+  setInterval(ping, 5 * 60 * 1000); // 5 phút
+}
 
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-  console.log("Ping service running on port " + PORT);
+  console.log("🚀 Ping service running on port " + PORT);
+  startPing();
 });
